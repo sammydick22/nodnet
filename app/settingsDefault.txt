@@ -1,8 +1,0 @@
-SENSITIVITY: (must be positive)
-3
-THRESHOLD: (must be positive)
-50
-ACCELERATION: (0 for no acceleration, must be positive)
-10
-IP: (win+r, cmd, type ipconfig, IPv4 Address -- keep port 4242 in app)
-0.0.0.0
