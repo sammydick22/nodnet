@@ -15,13 +15,15 @@ import com.github.kwhat.jnativehook.GlobalScreen;
 import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class NodNet implements NativeKeyListener{
     private static int screenWidth;
     private static int screenHeight;
     private static double pitchScaler;
     private static double sensitivity;
-    private static GUI gui = new GUI();
+    private static GUI gui;
     private static double acceleration;
     private static String ipv4;
     private static int port;
@@ -36,7 +38,7 @@ public class NodNet implements NativeKeyListener{
     public static void main(String[] args) {
         try {
             initializeScreenDimensions();
-            
+            gui = new GUI();
             System.out.println(sensitivity);
             System.err.println(acceleration);
             GlobalScreen.registerNativeHook();
@@ -47,7 +49,6 @@ public class NodNet implements NativeKeyListener{
                 try {
                     Robot robot = new Robot();
                     while (true) {
-                        if(altDown && zDown) locked = !locked;
                         if(!locked){
                             if (altDown && cDown) {
                                 if(!isRightPressing){
@@ -74,7 +75,7 @@ public class NodNet implements NativeKeyListener{
                                 }
                             }
                         }
-                        robot.delay(100); // Delay to avoid high CPU usage
+                        robot.delay(23); // Delay to avoid high CPU usage - standard mouse input
                     }
                 } catch (AWTException e) {
                     e.printStackTrace();
@@ -86,12 +87,19 @@ public class NodNet implements NativeKeyListener{
                 if(gui.getStarted() && !locked){
                     sensitivity = gui.getSens()/10.0;
                     acceleration = 1 + gui.getAccel()/10.0;
-                    ipv4 = gui.getIP();
+                    try(final DatagramSocket socket = new DatagramSocket()){
+                        socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                        ipv4 = socket.getLocalAddress().getHostAddress();
+            
+                    } catch (UnknownHostException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                     port = gui.getPort();
                     receiveFreelookData(ipv4, port); // IP and port can be adjusted
                 }
             } 
-        } catch (NativeHookException e) {
+        } catch (NativeHookException | SocketException e) {
             e.printStackTrace();
         }
     }
@@ -164,10 +172,16 @@ public class NodNet implements NativeKeyListener{
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
-        if (e.getKeyCode() == NativeKeyEvent.VC_ALT) altDown = true;
+        if (e.getKeyCode() == NativeKeyEvent.VC_ALT){
+            if (zDown) locked = !locked;
+            altDown = true;
+        }
         else if (e.getKeyCode() == NativeKeyEvent.VC_X) xDown = true;
         else if (e.getKeyCode() == NativeKeyEvent.VC_C) cDown = true;
-        else if (e.getKeyCode() == NativeKeyEvent.VC_Z) zDown = true;
+        else if (e.getKeyCode() == NativeKeyEvent.VC_Z){
+            if (altDown) locked = !locked;
+            zDown = true;
+        }
     }
 
     @Override

@@ -1,0 +1,29 @@
+Download "freelook head tracker" on app store (blue green red yellow icon)
+
+STEP 1)
+    FOR WINDOWS:
+        Start
+            --> Settings
+            --> Network & internet
+            --> Wi-Fi 
+            --> Select the Wi-Fi network you're connected to
+        Enter the displayed IPv4 address in IP adress field on NodNet and Freelook
+
+    FOR MAC:
+        System Settings
+            --> Wifi
+            --> 3 dots of the network you're connected to
+            --> Network Settings
+        Enter the displayed IP address in IP adress field on NodNet and Freelook
+        Run "src.NodNet.java"
+    
+STEP 2)
+    Type 4242 in the port section on both NodNet and Freelook
+
+STEP 3)
+    Start both Freelook and NodNet
+
+COMMANDS:
+    Alt-X --> left click
+    Alt-C --> right click
+    Alt-Z --> toggle input lock

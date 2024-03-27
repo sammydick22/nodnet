@@ -3,6 +3,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
 
 public class GUI implements ActionListener {
 
@@ -12,6 +17,7 @@ public class GUI implements ActionListener {
     private JButton startStopButton = new JButton("Start");
     private JButton resetButton = new JButton("Restore Defaults");
     private JLabel statusLabel = new JLabel("Status: Stopped");
+    private JLabel ipLabel;
 
     // Labels and TextFields for inputs
     private JLabel sensLabel = new JLabel("Sensitivity:");
@@ -20,8 +26,8 @@ public class GUI implements ActionListener {
     private JTextField threshBox = new JTextField("50", 2);
     private JLabel accelLabel = new JLabel("Acceleration:");
     private JTextField accelBox = new JTextField("10", 2);
-    private JLabel ipLabel = new JLabel("IP Address:");
-    private JTextField ipBox = new JTextField(10);
+    // private JLabel ipLabel = new JLabel("IP Address:");
+    // private JTextField ipBox = new JTextField(10);
     private JLabel portLabel = new JLabel("Port:");
     private JTextField portBox = new JTextField("4242", 6);
 
@@ -29,7 +35,6 @@ public class GUI implements ActionListener {
     private final String DEFAULT_SENS = "3";
     private final String DEFAULT_THRESH = "50";
     private final String DEFAULT_ACCEL = "10";
-    private final String DEFAULT_IP = ""; // Assuming empty as default
     private final String DEFAULT_PORT = "4242";
 
     public String sens = "3";
@@ -38,7 +43,17 @@ public class GUI implements ActionListener {
     public String ip = ""; // Assuming empty as default
     public String port = "4242";
 
-    public GUI() {
+    public GUI() throws SocketException {
+        try(final DatagramSocket socket = new DatagramSocket()){
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            ip = socket.getLocalAddress().getHostAddress();
+            System.err.println(ip);
+            ipLabel = new JLabel("IP Address: "+ip);
+
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         startStopButton.addActionListener(this);
         resetButton.addActionListener(this);
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
@@ -49,11 +64,11 @@ public class GUI implements ActionListener {
 
         panel.add(startStopButton, gbc);
         panel.add(statusLabel, gbc);
+        panel.add(ipLabel, gbc);
+        addLabeledField(portLabel, portBox, panel, gbc);
         addLabeledField(sensLabel, sensBox, panel, gbc);
         addLabeledField(threshLabel, threshBox, panel, gbc);
         addLabeledField(accelLabel, accelBox, panel, gbc);
-        addLabeledField(ipLabel, ipBox, panel, gbc);
-        addLabeledField(portLabel, portBox, panel, gbc);
         panel.add(resetButton, gbc);
 
         frame.add(panel, BorderLayout.CENTER);
@@ -73,9 +88,6 @@ public class GUI implements ActionListener {
     }
     public int getAccel() {
         return Integer.parseInt(accelBox.getText());
-    }
-    public String getIP() {
-        return ipBox.getText();
     }
     public int getPort() {
         return Integer.parseInt(portBox.getText());
@@ -100,12 +112,16 @@ public class GUI implements ActionListener {
             sensBox.setText(DEFAULT_SENS);
             threshBox.setText(DEFAULT_THRESH);
             accelBox.setText(DEFAULT_ACCEL);
-            ipBox.setText(DEFAULT_IP);
             portBox.setText(DEFAULT_PORT);
         }
     }
 
     public static void main(String[] args) {
-        new GUI();
+        try {
+            new GUI();
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
